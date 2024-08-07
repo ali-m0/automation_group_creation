@@ -1,0 +1,30 @@
+
+// Get all users in JIRA
+userManager.getAllUsers().each { user ->
+    try {
+        String userEmail = user.getEmailAddress().toLowerCase() // Convert email to lowercase
+
+        // Check if the user should be added based on the domain
+        if (userEmail.endsWith(domainToAdd) && !excludedEmails.contains(userEmail)) {
+            // Add user to the group
+            userUtil.addUserToGroup(group, user)
+            log.info("Added user ${user.username} with email ${userEmail} to group ${groupName}")
+        } 
+        // Check if specific allowed users should be added
+        else if (allowedUserEmails.contains(userEmail)) {
+            userUtil.addUserToGroup(group, user)
+            log.info("Added specifically allowed user ${user.username} with email ${userEmail} to group ${groupName}")
+        }
+        // Remove users with unwanted domains
+        else if (domainsToRemove.any { domain -> userEmail.endsWith(domain) }) {
+            if (groupManager.isUserInGroup(user, group)) {
+                userUtil.removeUserFromGroup(group, user)
+                log.info("Removed user ${user.username} with domain ${userEmail} from group ${groupName}")
+            }
+        }
+    } catch (Exception e) {
+        log.error("Failed to process user ${user.username}: ${e.message}")
+    }
+}
+
+log.info("Processed all users for group management based on email criteria.")
