@@ -1,0 +1,49 @@
+// Initialize Logger
+def log = Logger.getLogger("com.example.com") //your local logger
+
+// Define the group name
+def groupName = "test"
+
+// Define specific allowed users even if they don't match the main domain
+def allowedUserEmails = [
+    "a@gmail.com",
+    "b@gmail.com"
+].collect { it.toLowerCase() } // lower case each email address
+
+// Define the excluded user emails
+def excludedEmails = [
+    "C@gmail.com",
+    "d@gmail.com"
+].collect { it.toLowerCase() } // Ensure all excluded emails are lowercase
+
+// Define domains to remove
+def domainsToRemove = [
+    "@yahoo.com",
+    "@mail.com"
+].collect { it.toLowerCase() } // Ensure all domains to remove are lowercase
+
+// Define the domain to add
+def domainToAdd = "@gmail.com".toLowerCase()
+
+// Get the UserManager, UserSearchService, GroupManager, and UserUtil
+def userManager = ComponentAccessor.getUserManager()
+def groupManager = ComponentAccessor.getGroupManager()
+def userUtil = ComponentAccessor.getUserUtil()
+
+// Get the group
+def group = groupManager.getGroup(groupName)
+if (group == null) {
+    log.warn("Group ${groupName} does not exist")
+    return
+}
+
+// Remove all users from the group to start fresh
+def usersInGroup = groupManager.getUsersInGroup(group)
+usersInGroup.each { user ->
+    try {
+        userUtil.removeUserFromGroup(group, user)
+        log.info("Removed user ${user.username} from group ${groupName}")
+    } catch (Exception e) {
+        log.error("Failed to remove user ${user.username}: ${e.message}")
+    }
+}
