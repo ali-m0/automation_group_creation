@@ -1,0 +1,4 @@
+import com.atlassian.jira.component.ComponentAccessor
+import com.atlassian.jira.user.ApplicationUser
+import com.atlassian.jira.bc.user.search.UserSearchService
+import org.apache.log4j.Logger
